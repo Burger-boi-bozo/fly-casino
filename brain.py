@@ -94,6 +94,7 @@ class Brain:
         active=[i for i,v in enumerate(kc) if v>0]
         self.state['activity']['sensory']={k:round(vec[i],3) for i,k in enumerate(SENSORY_KEYS)}
         self.state['activity']['kc_sparse']=active[:32]
+        # Eligibility lets delayed reinforcement update recently active KCs.
         self.state['eligibility']=[max(e*.91,kc[i]) for i,e in enumerate(self.state['eligibility'])]
         return kc
 
@@ -125,6 +126,7 @@ class Brain:
             return pe
         lr=self.state['alpha']
         elig=self.state['eligibility']
+        # A compact approximation of compartmental KC→MBON plasticity.
         for i,e in enumerate(elig):
             if e<=0: continue
             self.state['mb_weights']['appetitive'][i]=clamp(self.state['mb_weights']['appetitive'][i]+lr*e*dan['PAM_reward']*.42,-1.5,1.5)
@@ -139,6 +141,7 @@ class Brain:
     def navigation(self,heading,target_bearing,hazard_bearing=None):
         epg=_ring(heading); goal=_ring(target_bearing)
         err=angle_wrap(target_bearing-heading)
+        # PFL3-like opponent steering signal, with an avoidance offset for a nearby threat.
         avoid=0.0
         if hazard_bearing is not None:
             avoid=-math.copysign(.9,hazard_bearing if abs(hazard_bearing)>.05 else .05)
@@ -175,6 +178,7 @@ class Brain:
     def choose_goal(self,fly,mbon,known,bankroll,rng=random):
         scores=self.goal_scores(fly,mbon,known,bankroll)
         keys=list(scores); vals=[scores[k] for k in keys]
+        # Noisy softmax preserves spontaneous exploration without omniscient targeting.
         temp=1.10
         m=max(vals); ex=[math.exp((v-m)/temp) for v in vals]
         r=rng.random()*sum(ex); a=0
@@ -210,6 +214,7 @@ class Brain:
         for i in range(EPG_N): nodes.append({'id':f'EPG{i:02}','label':f'EPG {i}','group':'central complex'})
         for name in ('MBON_appetitive','MBON_aversive','MBON_gambling','MBON_novelty','DAN_PAM','DAN_PPL1','PFL3_L','PFL3_R','DNa02_L','DNa02_R'):
             nodes.append({'id':name,'label':name.replace('_',' '),'group':'output'})
+        # Return representative explicit edges instead of every KC edge to keep browser payload small.
         for kci,conns in enumerate(self.projection[:48]):
             for si,w in conns: edges.append({'source':'S_'+SENSORY_KEYS[si],'target':f'KC{kci:03}','weight':round(w,3),'kind':'sensory→KC'})
             edges.append({'source':f'KC{kci:03}','target':'MBON_gambling','weight':round(self.state['mb_weights']['gambling'][kci],3),'kind':'plastic'})
