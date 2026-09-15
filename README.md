@@ -17,7 +17,6 @@ Fly Casino V3 is a persistent artificial-organism experiment inspired by known D
 - Automatic V1/V2 → V3 state migration
 
 FlyBucks are simulated and have no real-world value. This is a computational circuit model, not a biophysical whole-brain emulator.
-
 ## Deployment
 The production instance runs in Proxmox CT 103 on port 8080 behind Cloudflare Tunnel at `https://game.dpifiles.org`.
 
