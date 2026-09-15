@@ -1,12 +1,12 @@
 [Unit]
-Description=Fly Casino v2 2D Learning World
+Description=Fly Casino V3 Connectome-Inspired Organism
 After=network-online.target
 Wants=network-online.target
 
 [Service]
 Type=simple
 WorkingDirectory=/opt/fly-casino
-ExecStart=/usr/bin/gunicorn --workers 1 --threads 4 --bind 0.0.0.0:8080 --timeout 30 app:app
+ExecStart=/usr/bin/gunicorn --workers 1 --threads 4 --bind 0.0.0.0:8080 --timeout 60 app:app
 Restart=always
 RestartSec=3
 User=root
